@@ -42,6 +42,7 @@
             this.tsbInsert = new System.Windows.Forms.ToolStripButton();
             this.tsbRefresh = new System.Windows.Forms.ToolStripButton();
             this.mnuEditCar = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuCarOper = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.grid)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
@@ -69,12 +70,13 @@
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuCarOper,
             this.mnuEditCar,
             this.mnuDeleteCar,
             this.toolStripMenuItem1,
             this.mnuRefresh});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 98);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 120);
             // 
             // mnuDeleteCar
             // 
@@ -156,6 +158,13 @@
             this.mnuEditCar.Text = "Edytuj";
             this.mnuEditCar.Click += new System.EventHandler(this.mnuEditCar_Click);
             // 
+            // mnuCarOper
+            // 
+            this.mnuCarOper.Name = "mnuCarOper";
+            this.mnuCarOper.Size = new System.Drawing.Size(180, 22);
+            this.mnuCarOper.Text = "Wydaj/Przyjmij";
+            this.mnuCarOper.Click += new System.EventHandler(this.mnuCarOper_Click);
+            // 
             // FormCarList
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -189,5 +198,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem mnuRefresh;
         private System.Windows.Forms.ToolStripMenuItem mnuEditCar;
+        private System.Windows.Forms.ToolStripMenuItem mnuCarOper;
     }
 }

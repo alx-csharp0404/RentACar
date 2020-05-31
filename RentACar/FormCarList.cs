@@ -147,5 +147,25 @@ namespace RentACar
             }
 
         }
+
+        private void mnuCarOper_Click(object sender, EventArgs e)
+        {
+            if (grid.SelectedRows.Count == 0) return;
+            int selectedIndex = grid.SelectedRows[0].Index;
+            
+            int rowId = Convert.ToInt32(grid["id", selectedIndex].Value);
+            String regPlate = grid["registration_plate", selectedIndex].Value.ToString();
+            int avail = Convert.ToInt32(grid["avail", selectedIndex].Value);
+
+            FormOperation form = new FormOperation();
+            form.CarId = rowId;
+            form.RegPlate = regPlate;
+            form.OperBack = (avail == 0);
+
+            if (form.ShowDialog()==DialogResult.OK)
+            {
+                RefreshData();
+            }
+        }
     }
 }

@@ -127,7 +127,10 @@ namespace RentACar
         private void AddNewCar()
         {
             FormAddCar form = new FormAddCar();
-            form.ShowDialog();
+            if (form.ShowDialog()==DialogResult.OK)
+            {
+                RefreshData();
+            }
         }
     }
 }

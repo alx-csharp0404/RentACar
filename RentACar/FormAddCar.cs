@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.IO;
@@ -14,6 +15,10 @@ namespace RentACar
 {
     public partial class FormAddCar : Form
     {
+
+        // pole do przechowywania ID rekordu
+        public int RowId = 0;
+
         public FormAddCar()
         {
             InitializeComponent();
@@ -22,6 +27,39 @@ namespace RentACar
         private void FormAddCar_Load(object sender, EventArgs e)
         {
             LoadDictionaryData();
+            numYear.Minimum = Convert.ToInt32(ConfigurationManager.AppSettings["minYear"]);
+            numYear.Maximum = Convert.ToInt32(ConfigurationManager.AppSettings["maxYear"]);
+
+            if (RowId>0)
+            {
+                // wczytaj dane edytowanego rekordu i pokaz w kontrolkach
+                String sql = @" SELECT c.*, m.brand_id FROM cars c , car_models m 
+                                WHERE c.id = {0} AND c.model_id = m.id ";
+                sql = String.Format(sql, RowId);
+                MySqlCommand cmd = new MySqlCommand(sql, GlobalData.connection);
+                MySqlDataReader reader = cmd.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    reader.Read();
+
+                    // odczytywanie danych
+                    numEngine.Value = Convert.ToInt32(reader["engine"]);
+                    numYear.Value = Convert.ToInt32(reader["manufacturer_year"]);
+                    tbRegPlate.Text = reader["registration_plate"].ToString();
+                    cbFuel.SelectedIndex = cbFuel.Items.IndexOf(reader["fuel"]);
+
+                    cbBrands.SelectedValue = reader["brand_id"];
+                    cbModels.SelectedValue = reader["model_id"];
+                    cbTypes.SelectedValue = reader["type_id"];
+
+                    cbModels.Enabled = true;
+
+                    //zamknac reader
+                    reader.Close();
+
+                }
+
+            }
         }
 
         BindingSource bsBrands = new BindingSource();

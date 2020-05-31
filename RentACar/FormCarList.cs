@@ -132,5 +132,20 @@ namespace RentACar
                 RefreshData();
             }
         }
+
+        private void mnuEditCar_Click(object sender, EventArgs e)
+        {
+            if (grid.SelectedRows.Count == 0) return;
+            int selectedIndex = grid.SelectedRows[0].Index;
+            int rowId = Convert.ToInt32( grid["id", selectedIndex].Value );
+
+            FormAddCar form = new FormAddCar();
+            form.RowId = rowId;
+            if (form.ShowDialog() == DialogResult.OK)
+            {
+                RefreshData();
+            }
+
+        }
     }
 }

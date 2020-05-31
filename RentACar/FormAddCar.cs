@@ -30,36 +30,66 @@ namespace RentACar
             numYear.Minimum = Convert.ToInt32(ConfigurationManager.AppSettings["minYear"]);
             numYear.Maximum = Convert.ToInt32(ConfigurationManager.AppSettings["maxYear"]);
 
-            if (RowId>0)
+            try
             {
-                // wczytaj dane edytowanego rekordu i pokaz w kontrolkach
-                String sql = @" SELECT c.*, m.brand_id FROM cars c , car_models m 
-                                WHERE c.id = {0} AND c.model_id = m.id ";
-                sql = String.Format(sql, RowId);
-                MySqlCommand cmd = new MySqlCommand(sql, GlobalData.connection);
-                MySqlDataReader reader = cmd.ExecuteReader();
-                if (reader.HasRows)
+                if (RowId > 0)
                 {
-                    reader.Read();
+                    // wczytaj dane edytowanego rekordu i pokaz w kontrolkach
+                    String sql = @" SELECT c.*, m.brand_id FROM cars c , car_models m 
+                                WHERE c.id = {0} AND c.model_id = m.id ";
+                    sql = String.Format(sql, RowId);
+                    MySqlCommand cmd = new MySqlCommand(sql, GlobalData.connection);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        reader.Read();
 
-                    // odczytywanie danych
-                    numEngine.Value = Convert.ToInt32(reader["engine"]);
-                    numYear.Value = Convert.ToInt32(reader["manufacturer_year"]);
-                    tbRegPlate.Text = reader["registration_plate"].ToString();
-                    cbFuel.SelectedIndex = cbFuel.Items.IndexOf(reader["fuel"]);
+                        // odczytywanie danych
+                        numEngine.Value = Convert.ToInt32(reader["engine"]);
+                        numYear.Value = Convert.ToInt32(reader["manufacturer_year"]);
+                        tbRegPlate.Text = reader["registration_plate"].ToString();
+                        cbFuel.SelectedIndex = cbFuel.Items.IndexOf(reader["fuel"]);
 
-                    cbBrands.SelectedValue = reader["brand_id"];
-                    cbModels.SelectedValue = reader["model_id"];
-                    cbTypes.SelectedValue = reader["type_id"];
+                        cbBrands.SelectedValue = reader["brand_id"];
+                        cbModels.SelectedValue = reader["model_id"];
+                        cbTypes.SelectedValue = reader["type_id"];
 
-                    cbModels.Enabled = true;
+                        cbModels.Enabled = true;
 
-                    //zamknac reader
-                    reader.Close();
+                        if (!(reader["image"] is DBNull))
+                        {
+                            byte[] b = (byte[])reader["image"];
+                            if (b != null && b.Length > 0)
+                            {
+                                using (MemoryStream ms = new MemoryStream(b))
+                                {
+                                    picCar.Image = Image.FromStream(ms);
+                                }
+                            }
+                        }
+
+                        //zamknac reader
+                        reader.Close();
+
+                    }
 
                 }
 
+            } catch (Exception exc)
+            {
+                DialogHelper.E(exc.Message);
             }
+
+            if (RowId > 0)
+            {
+                btnOK.Text = "Zapisz zmiany";
+                Text = "Edycja pojazdu";
+            } else
+            {
+                btnOK.Text = "Dodaj";
+                Text = "Nowy pojazd";
+            }
+
         }
 
         BindingSource bsBrands = new BindingSource();
@@ -169,12 +199,24 @@ namespace RentACar
         {
             try
             {
-                String sql = @"
-                INSERT INTO cars
-                 (model_id, type_id, registration_plate, engine, manufacturer_year, avail, image, fuel)
-                 VALUES
-                 (@model_id, @type_id, @reg_plate, @engine, @year, 1, @image, @fuel)
-                ";
+                String sql = "";
+
+                if (RowId > 0)
+                {
+                    sql = @"UPDATE cars SET 
+	                        model_id=@model_id, type_id=@type_id, registration_plate=@reg_plate,
+	                        engine=@engine, manufacturer_year=@year, fuel=@fuel, image=@image
+                        WHERE id=@row_id";
+                }
+                else
+                {
+                    sql = @"
+                        INSERT INTO cars
+                         (model_id, type_id, registration_plate, engine, manufacturer_year, avail, image, fuel)
+                         VALUES
+                         (@model_id, @type_id, @reg_plate, @engine, @year, 1, @image, @fuel)
+                        ";
+                }
                 MySqlCommand cmd = new MySqlCommand(sql, GlobalData.connection);
                 cmd.Parameters.Add("@model_id", MySqlDbType.Int32);
                 cmd.Parameters.Add("@type_id", MySqlDbType.Int32);
@@ -183,6 +225,7 @@ namespace RentACar
                 cmd.Parameters.Add("@engine", MySqlDbType.Int32);
                 cmd.Parameters.Add("@fuel", MySqlDbType.VarChar, 10);
                 cmd.Parameters.Add("@image", MySqlDbType.MediumBlob);
+                cmd.Parameters.Add("@row_id", MySqlDbType.Int32);
 
                 cmd.Parameters["@model_id"].Value = cbModels.SelectedValue;
                 cmd.Parameters["@type_id"].Value = cbTypes.SelectedValue;
@@ -190,6 +233,7 @@ namespace RentACar
                 cmd.Parameters["@year"].Value = numYear.Value;
                 cmd.Parameters["@engine"].Value = numEngine.Value;
                 cmd.Parameters["@fuel"].Value = cbFuel.SelectedItem; //!!!!
+                cmd.Parameters["@row_id"].Value = RowId;
 
                 if (pictureFileName != null && File.Exists(pictureFileName))
                 {
